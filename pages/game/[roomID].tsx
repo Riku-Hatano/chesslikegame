@@ -5,59 +5,47 @@ const socketio = require("socket.io-client");
 const GameRoom = () => {
     const router = useRouter();
     const [socketIo, setSocketIo] = useState<any>();
-    const roomID = router.query;
+    const [roomID, setRoomID] = useState<string | undefined>(undefined);
+    const [username, setUsername] = useState("");
 
     const getRoomMember = () => {
-        socketIo.emit("check-room", roomID.roomID);
+        if(roomID !== undefined && socketIo) {
+            socketIo.emit("check-room", roomID);
+        }
     }
 
     useEffect(() => {
-        // const io = socketio("http://10.2.121.183:8080");
         const io = socketio("http://localhost:8080");
+        // const io = socketio("http://10.2.121.183:8080");
         setSocketIo(io);
+
         io.on("connect", () => {
             console.log(io.id);
+            setUsername(io.id);
         });
+
         io.on("rooms", (members: any) => {
             console.log(Array.from(members));
         })
-        // roomID.roomID !== undefined ? io.emit("join-room", roomID.roomID) : false;
-        return () => {
+
+        return() => {
             io.disconnect();
         }
-    }, [router.query])
+    }, []); // This runs only once to establish the socket connection
 
     useEffect(() => {
-        console.log(roomID.roomID);
-        console.log(socketIo);
-        if(roomID.roomID !== undefined && socketIo !== undefined) {
-            console.log("done")
-            socketIo.emit("join-room", roomID.roomID)
+        if(router.query.roomID !== undefined) {
+            if(socketIo) {
+                socketIo.emit("join-room", router.query.roomID);
+                setRoomID(router.query.roomID as string);
+            }
         }
-    }, []);
+    }, [socketIo, router.query]); // This updates when socketIo or router.query changes
 
-
-
-
-
-
-    // useEffect(() => {
-    //     const io = socketio("http://10.2.121.183:8080");
-    //     setSocketIo(io);
-    //     io.on("connect", () => {
-    //         console.log(io.id);
-    //     });
-    //     io.on("rooms", (members: any) => {
-    //         console.log(Array.from(members));
-    //     })
-    //     roomID.roomID !== undefined ? io.emit("join-room", roomID.roomID) : false;
-    //     return () => {
-    //         io.disconnect();
-    //     }
-    // }, [router.query])
     return (
         <>
-            {/* <p>{roomID}</p> */}
+            <p>room: {roomID}</p>
+            <p>username: {username}</p>
             <button onClick={getRoomMember}>check room members</button>
         </>
     )
