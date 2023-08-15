@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 const socketio = require("socket.io-client");
+import { localhost, localIP } from "../../global/path";
+import EditModal from "./modals/EditModal";
 
 const GameRoom = () => {
     const router = useRouter();
@@ -9,20 +11,13 @@ const GameRoom = () => {
     const [username, setUsername] = useState("");
     const [roomMembers, setRoomMembers] = useState<string[]>([]);
 
-    const getRoomMember = () => {
-        if(roomID !== undefined && socketIo) {
-            socketIo.emit("check-room", roomID);
-        }
-    }
-
     useEffect(() => { //socketのインスタンスとサーバー側からのデータ送信のリスナーを設定
-        const io = socketio("http://localhost:8080");
-        // const io = socketio("http://10.2.121.183:8080");
+        const io = socketio(localhost);
+        // const io = socketio(localIP);
         setSocketIo(io);
 
         io.on("connect", () => {
             setUsername(io.id);
-            setRoomMembers((prevRoomMembers) => [...prevRoomMembers, io.id]);
         });
 
         //リスナー用
@@ -32,49 +27,50 @@ const GameRoom = () => {
                 alert("cannot enter room");
                 io.disconnect();
             } else {
-                setRoomMembers((prevRoomMembers) => [...prevRoomMembers, ...members]);
+                setRoomMembers([...members]);
             }
         })
         io.on("failed-to-login", () => {
             alert(`${io.id} failed to login`)
         })
-
-        return() => {
-            io.disconnect();
+        if(io) {
+            return() => {
+                io.emit("leave-room", roomID);
+                io.disconnect();
+            }
         }
-    }, []);
+    }, [roomID]); //依存配列にroomIDがあることで、ioが2回無駄に定義されている。あとで直す。
 
     useEffect(() => { //queryの名前に応じてsocketのルームにjoinする。routerとsocketIoの更新が非同期で行われるため、router.queryをリッスンしてuseEffectする必要がある
         if(router.query.roomID !== undefined && socketIo !== undefined) {
             socketIo.emit("join-room", router.query.roomID);
             setRoomID(router.query.roomID as string);
         }
-        // if(router.query.roomID !== undefined) {
-        //     if(socketIo) {
-        //         socketIo.emit("join-room", router.query.roomID);
-        //         setRoomID(router.query.roomID as string);
-        //     }
-        // }
     }, [socketIo, router.query]);
 
     return (
         <>
             <p>room: {roomID}</p>
             <p>username: {username}</p>
-            <button onClick={getRoomMember}>check room members</button>
             {
                 roomMembers.length ?
                 <ul>
                     {
                         roomMembers.map((member: string, idx: number) => {
                             return (
-                                <li key={idx}>{ member }</li>
+                                <li key={idx}>{member}</li>
                             )
                         })
                     }
                 </ul>
                 : console.log("no users yet")
             }
+            {
+                roomMembers.length === 1 ?
+                <p>waiting for other player...</p>
+                : console.log("game is ready!!")
+            }
+            <EditModal />
         </>
     )
 }

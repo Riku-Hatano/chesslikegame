@@ -1,0 +1,39 @@
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+}
+
+.row:nth-child(even) > .cell:nth-child(even),
+.row:nth-child(odd) > .cell:nth-child(odd) {
+    background-color: khaki;
+}
+
+.row:nth-child(even) > .cell:nth-child(odd),
+.row:nth-child(odd) > .cell:nth-child(even) {
+    background-color: green;
+}
+
+.row {
+    display: flex;
+}
+
+.pieces {
+    display: flex;
+    width: 50%;
+    justify-content: space-between;
+}
+
+.piece {
+    width: 20px;
+    height: 20px;
+    background-color: gray;
+}
+
+.piece:hover {
+    background-color: black;
+}
