@@ -1,2 +1,2 @@
 export const localhost = "http://localhost:8080";
-export const localIP = "http://10.2.124.249:8080";
+export const localIP = "http://192.168.10.3:8080";

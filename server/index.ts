@@ -7,13 +7,12 @@ io.on("connection", (socket: any) => {
     console.log(`Connected: ${socket.id}`);
 
     socket.on("join-room", (roomID: string) => {
-        //この段階でルームの人数が二人以上だった場合、ルームに入れないようにする
+        //If there were more that two persons in the specific room, prevent users from enter the room.
         if(io.sockets.adapter.rooms.get(roomID) === undefined || Array.from(io.sockets.adapter.rooms.get(roomID)).length < 2) {
             console.log(`${socket.id} joined ${roomID} !`);
             socket.join(roomID);
             io.to(roomID).emit("receive-members", Array.from(io.sockets.adapter.rooms.get(roomID)));
         } else {
-            console.log("failed to login");
             socket.emit("failed-to-login");
         }
     })

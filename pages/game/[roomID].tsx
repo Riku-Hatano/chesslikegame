@@ -2,7 +2,10 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 const socketio = require("socket.io-client");
 import { localhost, localIP } from "../../global/path";
+import RoomMembers from "./modals/RoomMembers";
 import EditModal from "./modals/EditModal";
+import BoardModal from "./modals/BoardModal";
+import ResultModal from "./modals/ResultModal";
 
 const GameRoom = () => {
     const router = useRouter();
@@ -12,26 +15,22 @@ const GameRoom = () => {
     const [roomMembers, setRoomMembers] = useState<string[]>([]);
 
     useEffect(() => { //socketのインスタンスとサーバー側からのデータ送信のリスナーを設定
-        const io = socketio(localhost);
-        // const io = socketio(localIP);
+        // const io = socketio(localhost);
+        const io = socketio(localIP);
         setSocketIo(io);
 
-        io.on("connect", () => {
+        io.on("connect", () => { //New user would be created here
             setUsername(io.id);
         });
 
-        //リスナー用
+        //Event Listener
         io.on("receive-members", (members: any) => {
             console.log(Array.from(members));
-            if(Array.from(members).length > 2) {
-                alert("cannot enter room");
-                io.disconnect();
-            } else {
-                setRoomMembers([...members]);
-            }
+            setRoomMembers([...members]);
         })
         io.on("failed-to-login", () => {
-            alert(`${io.id} failed to login`)
+            alert(`${io.id} failed to login`);
+            router.push("/");
         })
         if(io) {
             return() => {
@@ -39,7 +38,8 @@ const GameRoom = () => {
                 io.disconnect();
             }
         }
-    }, [roomID]); //依存配列にroomIDがあることで、ioが2回無駄に定義されている。あとで直す。
+        setRoomID(router.query.roomID as string);
+    }, [roomID]); //io was defined twice unintentionally because dependency array has [roomID]. I should fix it later!
 
     useEffect(() => { //queryの名前に応じてsocketのルームにjoinする。routerとsocketIoの更新が非同期で行われるため、router.queryをリッスンしてuseEffectする必要がある
         if(router.query.roomID !== undefined && socketIo !== undefined) {
@@ -50,7 +50,7 @@ const GameRoom = () => {
 
     return (
         <>
-            <p>room: {roomID}</p>
+            {/* <p>room: {roomID}</p>
             <p>username: {username}</p>
             {
                 roomMembers.length ?
@@ -69,8 +69,11 @@ const GameRoom = () => {
                 roomMembers.length === 1 ?
                 <p>waiting for other player...</p>
                 : console.log("game is ready!!")
-            }
+            } */}
+
+
             <EditModal />
+            <RoomMembers />
         </>
     )
 }
