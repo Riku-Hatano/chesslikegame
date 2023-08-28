@@ -7,7 +7,7 @@ io.on("connection", (socket: any) => {
     console.log(`Connected: ${socket.id}`);
 
     socket.on("join-room", (roomID: string) => {
-        //If there were more that two persons in the specific room, prevent users from enter the room.
+        //If there were more than two persons in the specific room, prevent users from enter the room.
         if(io.sockets.adapter.rooms.get(roomID) === undefined || Array.from(io.sockets.adapter.rooms.get(roomID)).length < 2) {
             console.log(`${socket.id} joined ${roomID} !`);
             socket.join(roomID);
@@ -17,14 +17,9 @@ io.on("connection", (socket: any) => {
         }
     })
     socket.on("leave-room", (roomID: string) => {
-        console.log(roomID);
-        socket.leave(roomID);
-
         // Get the members of the room and emit the updated list to remaining members
         const room = io.sockets.adapter.rooms.get(roomID);
-        console.log(room);
         if(room) {
-            console.log("still one user")
             const roomMembers = Array.from(room);
             io.to(roomID).emit("receive-members", roomMembers);
         }

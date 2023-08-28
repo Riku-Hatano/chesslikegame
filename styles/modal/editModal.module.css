@@ -4,18 +4,24 @@
 }
 
 .cell {
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 35px;
 }
 
 .row:nth-child(even) > .cell:nth-child(even),
 .row:nth-child(odd) > .cell:nth-child(odd) {
     background-color: khaki;
+    color: green;
 }
 
 .row:nth-child(even) > .cell:nth-child(odd),
 .row:nth-child(odd) > .cell:nth-child(even) {
     background-color: green;
+    color: khaki;
 }
 
 .row {
@@ -24,16 +30,21 @@
 
 .pieces {
     display: flex;
-    width: 50%;
+    width: 100%;
     justify-content: space-between;
 }
 
 .piece {
-    width: 20px;
-    height: 20px;
-    background-color: gray;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    color: black;
 }
 
 .piece:hover {
     background-color: black;
+    color: white;
 }

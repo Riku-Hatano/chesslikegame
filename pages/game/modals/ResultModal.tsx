@@ -1,4 +1,4 @@
-const ResultModal = () => {
+const ResultModal = ({roomState}: any) => {
     return (
         <>
             <p>Result modal</p>

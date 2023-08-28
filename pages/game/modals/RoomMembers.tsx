@@ -1,7 +1,7 @@
-const RoomMembers = () => {
+const RoomMembers = ({roomState}: any) => {
     return (
         <>
-            <p>roommembers</p>
+            {/* <p>roommembers</p> */}
         </>
     )
 }

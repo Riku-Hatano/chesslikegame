@@ -1,0 +1,22 @@
+.roomMembers {
+}
+
+.editModal {
+    /* display: none; */
+}
+
+.boardModal {
+    /* display: none; */
+}
+
+.resultModal {
+    /* display: none; */
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}

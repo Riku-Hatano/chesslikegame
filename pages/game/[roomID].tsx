@@ -2,31 +2,40 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 const socketio = require("socket.io-client");
 import { localhost, localIP } from "../../global/path";
+import { initialRoomState } from "./initialRoomState";
 import RoomMembers from "./modals/RoomMembers";
 import EditModal from "./modals/EditModal";
 import BoardModal from "./modals/BoardModal";
 import ResultModal from "./modals/ResultModal";
+import GameRoomType, { gameRoom } from "../../types/gameRoom";
+import styles from "../../styles/roomID.module.css";
+import TimerCompo from "./components/TimerCompo";
 
 const GameRoom = () => {
+    const [roomState, setRoomState] = useState(initialRoomState);
     const router = useRouter();
     const [socketIo, setSocketIo] = useState<any>();
-    const [roomID, setRoomID] = useState<string | undefined>(undefined);
-    const [username, setUsername] = useState("");
-    const [roomMembers, setRoomMembers] = useState<string[]>([]);
 
     useEffect(() => { //socketのインスタンスとサーバー側からのデータ送信のリスナーを設定
-        // const io = socketio(localhost);
         const io = socketio(localIP);
         setSocketIo(io);
 
         io.on("connect", () => { //New user would be created here
-            setUsername(io.id);
+            setRoomState((prevState) => ({
+                ...prevState,
+                socketID: io.id
+            }))
         });
 
         //Event Listener
-        io.on("receive-members", (members: any) => {
-            console.log(Array.from(members));
-            setRoomMembers([...members]);
+        io.on("receive-members", (members: GameRoomType["members"]) => {
+            if(members !== null) {//部屋を抜けた段階でも、抜けたはずのソケットidがまだ存在するっs(disconnectが最後に行われているため)
+                console.log(Array.from(members));
+                setRoomState((prevState) => ({
+                    ...prevState,
+                    members: members
+                }))
+            }
         })
         io.on("failed-to-login", () => {
             alert(`${io.id} failed to login`);
@@ -34,47 +43,50 @@ const GameRoom = () => {
         })
         if(io) {
             return() => {
-                io.emit("leave-room", roomID);
+                io.emit("leave-room", roomState.roomID);
                 io.disconnect();
             }
         }
-        setRoomID(router.query.roomID as string);
-    }, [roomID]); //io was defined twice unintentionally because dependency array has [roomID]. I should fix it later!
+        setRoomState((prevState) => ({
+            ...prevState,
+            roomID: router.query.roomID as string
+        }))
+    }, [roomState.roomID]); //io was defined twice unintentionally because dependency array has [roomID]. I should fix it later!
 
     useEffect(() => { //queryの名前に応じてsocketのルームにjoinする。routerとsocketIoの更新が非同期で行われるため、router.queryをリッスンしてuseEffectする必要がある
         if(router.query.roomID !== undefined && socketIo !== undefined) {
             socketIo.emit("join-room", router.query.roomID);
-            setRoomID(router.query.roomID as string);
+            setRoomState((prevState) => ({
+                ...prevState,
+                roomID: router.query.roomID as string
+            }))
         }
     }, [socketIo, router.query]);
 
     return (
-        <>
-            {/* <p>room: {roomID}</p>
-            <p>username: {username}</p>
+        <div className={styles.main}>
             {
-                roomMembers.length ?
-                <ul>
-                    {
-                        roomMembers.map((member: string, idx: number) => {
-                            return (
-                                <li key={idx}>{member}</li>
-                            )
-                        })
-                    }
-                </ul>
-                : console.log("no users yet")
-            }
-            {
-                roomMembers.length === 1 ?
+                roomState.members && roomState.members.length === 2 ?
+                <div>
+                    <TimerCompo />
+                    <div className={styles.roomMembers}>
+                        <RoomMembers roomState={roomState} />
+                    </div>
+                    <div className={styles.editModal}>
+                        <EditModal roomState={roomState} setRoomState={setRoomState}/>
+                    </div>
+                </div>
+                :
                 <p>waiting for other player...</p>
-                : console.log("game is ready!!")
-            } */}
+            }
 
-
-            <EditModal />
-            <RoomMembers />
-        </>
+            <div className={styles.boardModal}>
+                <BoardModal roomState={roomState} />
+            </div>
+            <div className={styles.resultModal}>
+                <ResultModal roomState={roomState} className={styles.resultModal}/>
+            </div>
+        </div>
     )
 }
 

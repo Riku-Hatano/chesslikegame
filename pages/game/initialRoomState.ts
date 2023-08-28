@@ -1,12 +1,24 @@
 import gameRoom from "../../types/gameRoom"
 
 export const initialRoomState: gameRoom = {
-    roomID: "",
+    roomID: undefined,
     members: null,
     username: "",
     socketID: "",
     game: {
-        board: {},
-        turn: "",
+        board: [
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null]
+        ],
+        selectedPieceKind: null,
+        selectedCell: null,
+        availablePlaces: [],
+        isClicked: false,
+        isWhiteTurn: true,
+        specialFlag: ""
     }
 }

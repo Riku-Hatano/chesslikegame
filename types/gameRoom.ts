@@ -1,11 +1,16 @@
 export interface gameRoom {
-    roomID: string,
+    roomID: string | undefined,
+    username: string | undefined,
     members: string[] | null,
-    username: string,
     socketID: string,
     game: {
-        board:{},
-        turn: string,
+        board: string[][] | null[][],
+        selectedPieceKind: string | null,
+        selectedCell: string | null,
+        availablePlaces: string[] | null,
+        isClicked: boolean,
+        isWhiteTurn: boolean,
+        specialFlag: string
     }
 }
 

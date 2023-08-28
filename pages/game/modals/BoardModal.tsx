@@ -1,4 +1,4 @@
-const BoardModal = () => {
+const BoardModal = ({roomState}: any) => {
     return (
         <>
             <p>board modal</p>
