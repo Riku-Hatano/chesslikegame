@@ -7,12 +7,23 @@ import RoomMembers from "./modals/RoomMembers";
 import EditModal from "./modals/EditModal";
 import BoardModal from "./modals/BoardModal";
 import ResultModal from "./modals/ResultModal";
+import WaitPlayerModal from "./modals/WaitPlayerModal";
 import GameRoomType, { gameRoom } from "../../types/gameRoom";
+import eventStates from "../../global/eventStates";
 import styles from "../../styles/roomID.module.css";
 import TimerCompo from "./components/TimerCompo";
 
 const GameRoom = () => {
     const [roomState, setRoomState] = useState(initialRoomState);
+    const [eventState, setEventState] = useState(eventStates);
+    console.log(roomState);
+    // eventState are gonna be like
+    // 1.Waiting for other player (show WaitPlayerModal.tsx)......wait
+    // 2.Editing board before starting game (show EditModal.tsx)..edit
+    // 3.Actually playing game with board (show BoardModal.tsx)...game
+    // 4.Result (show ResultModal.tsx)............................result
+
+
     const router = useRouter();
     const [socketIo, setSocketIo] = useState<any>();
 
@@ -31,6 +42,12 @@ const GameRoom = () => {
         io.on("receive-members", (members: GameRoomType["members"]) => {
             if(members !== null) {//部屋を抜けた段階でも、抜けたはずのソケットidがまだ存在するっs(disconnectが最後に行われているため)
                 console.log(Array.from(members));
+                if(Array.from(members).length === 2) {
+                    setEventState((prevState) => ({
+                        ...prevState,
+                        state: prevState.state + 1
+                    }))
+                }
                 setRoomState((prevState) => ({
                     ...prevState,
                     members: members
@@ -66,7 +83,8 @@ const GameRoom = () => {
     return (
         <div className={styles.main}>
             {
-                roomState.members && roomState.members.length === 2 ?
+                // roomState.members && roomState.members.length === 2 ?
+                eventState.state === 0 ?
                 <div>
                     <TimerCompo />
                     <div className={styles.roomMembers}>
@@ -77,7 +95,7 @@ const GameRoom = () => {
                     </div>
                 </div>
                 :
-                <p>waiting for other player...</p>
+                <WaitPlayerModal />
             }
 
             <div className={styles.boardModal}>
