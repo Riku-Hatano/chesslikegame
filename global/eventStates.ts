@@ -1,10 +1,12 @@
 interface eventStates {
-    state: number,
+    stateNum: number,
+    state: string,
     statesArr: string[]
 }
 
 const eventStates: eventStates = {
-    state: 0,
+    stateNum: 0,
+    state: "wait",
     statesArr: [
         "wait",
         "edit",

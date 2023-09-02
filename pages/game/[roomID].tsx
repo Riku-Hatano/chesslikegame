@@ -16,7 +16,7 @@ import TimerCompo from "./components/TimerCompo";
 const GameRoom = () => {
     const [roomState, setRoomState] = useState(initialRoomState);
     const [eventState, setEventState] = useState(eventStates);
-    console.log(roomState);
+    console.log(eventState);
     // eventState are gonna be like
     // 1.Waiting for other player (show WaitPlayerModal.tsx)......wait
     // 2.Editing board before starting game (show EditModal.tsx)..edit
@@ -45,7 +45,7 @@ const GameRoom = () => {
                 if(Array.from(members).length === 2) {
                     setEventState((prevState) => ({
                         ...prevState,
-                        state: prevState.state + 1
+                        state: "edit"
                     }))
                 }
                 setRoomState((prevState) => ({
@@ -80,30 +80,54 @@ const GameRoom = () => {
         }
     }, [socketIo, router.query]);
 
+    const changeEventState = () => {
+        console.log("changed")
+        setEventState((prevState) => ({
+            ...prevState,
+            stateNum: (prevState.stateNum + 1) % 3,
+            state: prevState.statesArr[prevState.stateNum + 1]
+        }))
+    }
+
     return (
         <div className={styles.main}>
+            <button onClick={changeEventState}>test</button>
             {
                 // roomState.members && roomState.members.length === 2 ?
-                eventState.state === 0 ?
+                eventState.state === "wait" ?
+                <WaitPlayerModal />
+                :
+                false
+            }
+            {
+                eventState.state === "edit" ?
                 <div>
                     <TimerCompo />
-                    <div className={styles.roomMembers}>
-                        <RoomMembers roomState={roomState} />
-                    </div>
                     <div className={styles.editModal}>
-                        <EditModal roomState={roomState} setRoomState={setRoomState}/>
+                        <EditModal roomState={roomState} setRoomState={setRoomState} />
                     </div>
                 </div>
                 :
-                <WaitPlayerModal />
+                false
             }
-
-            <div className={styles.boardModal}>
-                <BoardModal roomState={roomState} />
-            </div>
-            <div className={styles.resultModal}>
-                <ResultModal roomState={roomState} className={styles.resultModal}/>
-            </div>
+            {
+                eventState.state === "game" ?
+                <div className={styles.boardModal}>
+                    <BoardModal roomState={roomState} />
+                    <h2>game</h2>
+                </div>
+                :
+                false
+            }
+            {
+                eventState.state === "result" ?
+                <div className={styles.resultModal}>
+                    <ResultModal roomState={roomState} className={styles.resultModal}/>
+                    <h2>result</h2>
+                </div>
+                :
+                false
+            }
         </div>
     )
 }

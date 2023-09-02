@@ -19,6 +19,7 @@ export const initialRoomState: gameRoom = {
         availablePlaces: [],
         isClicked: false,
         isWhiteTurn: true,
-        specialFlag: ""
+        specialFlag: "",
+        remainingTime: 20
     }
 }

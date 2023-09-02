@@ -10,7 +10,8 @@ export interface gameRoom {
         availablePlaces: string[] | null,
         isClicked: boolean,
         isWhiteTurn: boolean,
-        specialFlag: string
+        specialFlag: string,
+        remainingTime: number,
     }
 }
 
